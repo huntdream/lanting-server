@@ -1,6 +1,9 @@
 package service
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/huntdream/lanting-server/app"
 	"github.com/huntdream/lanting-server/model"
@@ -35,13 +38,27 @@ func GetArticles(c *gin.Context) {
 	return
 }
 
-//GetArticle get article
-func GetArticle(c *gin.Context) {
-	id := c.Param("id")
+//GetArticleByID get article by id
+func GetArticleByID(id int) (article model.Article, err error) {
 
-	c.JSON(200, gin.H{
-		"message": id,
-	})
+	if err := app.DB.Table("articles").Where("id = ?", id).Find(&article).Error; err != nil {
+		return article, err
+	}
+
+	return article, nil
+}
+
+//AddArticle add article
+func AddArticle(c *gin.Context) {
+	var article model.Article
+
+	if err := c.ShouldBind(&article); err != nil {
+		log.Println(err)
+	}
+
+	record := app.DB.Table("articles").Create(&article)
+
+	c.JSON(http.StatusOK, record.Value)
 
 	return
 }
