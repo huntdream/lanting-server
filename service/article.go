@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/huntdream/lanting-server/app"
 	"github.com/huntdream/lanting-server/model"
+	"github.com/huntdream/lanting-server/util"
 )
 
 //ArticlesRequest params
@@ -55,6 +56,15 @@ func AddArticle(c *gin.Context) {
 	if err := c.ShouldBind(&article); err != nil {
 		log.Println(err)
 	}
+
+	article.Content = util.Sanitize(article.Content)
+	excerpt := []rune(util.ExtractText(article.Content))
+
+	if len(excerpt) > 40 {
+		excerpt = excerpt[:40]
+	}
+
+	article.Excerpt = string(excerpt)
 
 	record := app.DB.Table("articles").Create(&article)
 
