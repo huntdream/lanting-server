@@ -1,11 +1,12 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/huntdream/lanting-server/model"
+	"github.com/huntdream/lanting-server/service"
 	"github.com/huntdream/lanting-server/util"
 )
 
@@ -58,7 +59,15 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		log.Println(token, username)
+		user, err := service.FindUser(username)
+
+		if (user == model.User{} || err != nil) {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "user not found",
+			})
+
+			return
+		}
 
 		c.Next()
 	}
