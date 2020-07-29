@@ -18,7 +18,7 @@ type Claims struct {
 //GenerateToken generate jwt token
 func GenerateToken(username string) (tokenString string, err error) {
 	//the token expiration time
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(5 * time.Hour)
 
 	claims := Claims{
 		Username: username,
