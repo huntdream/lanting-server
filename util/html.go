@@ -29,7 +29,7 @@ func ExtractText(raw string) string {
 		if tokenType == html.TextToken {
 			node := tokenizer.Token().Data
 
-			text += node
+			text += strings.TrimSpace(node) + " "
 		}
 
 	}
