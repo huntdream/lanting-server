@@ -1,10 +1,6 @@
 package service
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 	"github.com/huntdream/lanting-server/app"
 	"github.com/huntdream/lanting-server/model"
 	"github.com/huntdream/lanting-server/util"
@@ -17,26 +13,13 @@ type ArticlesRequest struct {
 }
 
 //GetArticles get articles
-func GetArticles(c *gin.Context) {
+func GetArticles(size string, after string) (articles []model.Article, total int, count int) {
 
-	var articles []model.Article
-	var total int
-	var count int
-
-	size := c.DefaultQuery("size", "10")
-	after := c.DefaultQuery("after", "0")
-
-	app.DB.Table("articles").Where("id > ?", after).Limit(size).Find(&articles).Count(&total)
+	app.DB.Table("articles").Where("id < ?", after).Order("created_at desc").Limit(size).Find(&articles).Count(&total)
 
 	count = len(articles)
 
-	c.JSON(200, gin.H{
-		"data":  articles,
-		"total": total,
-		"count": count,
-	})
-
-	return
+	return articles, total, count
 }
 
 //GetArticleByID get article by id
@@ -50,12 +33,7 @@ func GetArticleByID(id int) (article model.Article, err error) {
 }
 
 //AddArticle add article
-func AddArticle(c *gin.Context) {
-	var article model.Article
-
-	if err := c.ShouldBind(&article); err != nil {
-		log.Println(err)
-	}
+func AddArticle(article model.Article) (value interface{}) {
 
 	article.Content = util.Sanitize(article.Content)
 	excerpt := []rune(util.ExtractText(article.Content))
@@ -68,7 +46,5 @@ func AddArticle(c *gin.Context) {
 
 	record := app.DB.Table("articles").Create(&article)
 
-	c.JSON(http.StatusOK, record.Value)
-
-	return
+	return record.Value
 }
