@@ -13,5 +13,6 @@ func registerArticle(router *gin.RouterGroup) {
 		article.GET("", api.GetArticles)
 		article.GET("/:id", api.GetArticle)
 		article.POST("", middleware.JWT(), api.AddArticle)
+		article.POST("/", middleware.JWT(), api.AddArticle)
 	}
 }

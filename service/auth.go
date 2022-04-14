@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,11 +37,16 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	userInfo.Password = hashPassword(userInfo.Password)
+	result, err := app.DB.Exec("insert into users (username, password) values (?,? )", userInfo.Username, userInfo.Password)
 
-	if err := app.DB.Table("users").Create(&userInfo).Error; err != nil {
+	id, err := result.LastInsertId()
+
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
+			"data": gin.H{
+				"id": id,
+			},
 		})
 
 		return
@@ -99,10 +105,12 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(user)
+
 	//check if password provided match the database record
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInfo.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "username or password not match",
+			"message": "username and password not match",
 		})
 
 		return

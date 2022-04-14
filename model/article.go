@@ -8,3 +8,10 @@ type Article struct {
 	Excerpt string `json:"excerpt"`
 	Base
 }
+
+// Feed Item
+type FeedItem struct {
+	ID      int64  `json:"id" gorm:"PRIMARY_KEY"`
+	Title   string `json:"title"`
+	Excerpt string `json:"excerpt"`
+}

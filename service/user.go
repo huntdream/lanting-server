@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -21,7 +22,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	app.DB.Table("users").Create(&user)
+	app.DB.Exec("insert into users (username, password) values (?,? )", user.Username, user.Password)
 
 	fmt.Println(user)
 
@@ -32,8 +33,14 @@ func CreateUser(c *gin.Context) {
 
 //FindUser find user by username
 func FindUser(username string) (user model.User, err error) {
-	if err = app.DB.Table("users").Where("username = ?", username).Find(&user).Error; err != nil {
-		return user, err
+	row := app.DB.QueryRow("select username, password from users where username = ?", username)
+
+	if err := row.Scan(&user.Username, &user.Password); err != nil {
+		if err == sql.ErrNoRows {
+			return user, fmt.Errorf("user not found")
+		}
+
+		return user, fmt.Errorf("FindUser %v", err)
 	}
 
 	return user, nil

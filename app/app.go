@@ -1,8 +1,13 @@
 package app
 
-import "github.com/jinzhu/gorm"
+import (
+	"database/sql"
+
+	"github.com/huntdream/lanting-server/config"
+)
 
 // Global context
 var (
-	DB *gorm.DB
+	DB     *sql.DB
+	Config config.Configuration
 )

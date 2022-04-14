@@ -1,41 +1,68 @@
 package service
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
+
 	"github.com/huntdream/lanting-server/app"
 	"github.com/huntdream/lanting-server/model"
 	"github.com/huntdream/lanting-server/util"
 )
 
-//ArticlesRequest params
-type ArticlesRequest struct {
-	after int
-	size  int
-}
-
 //GetArticles get articles
-func GetArticles(size string, after string) (articles []model.Article, total int, count int) {
+func GetArticles(size string, after string) (feed []model.FeedItem, total int, count int) {
+	rows, err := app.DB.Query("select id, title, excerpt from articles order by id desc")
 
-	app.DB.Table("articles").Where("id < ?", after).Order("created_at desc").Limit(size).Find(&articles).Count(&total)
+	if err != nil {
+		return feed, 0, 0
+	}
 
-	count = len(articles)
+	defer rows.Close()
 
-	return articles, total, count
+	for rows.Next() {
+		var article model.FeedItem
+
+		if err = rows.Scan(&article.ID, &article.Title, &article.Excerpt); err != nil {
+			fmt.Println(article.Title, err.Error())
+
+			return feed, 0, 0
+		}
+
+		feed = append(feed, article)
+	}
+
+	if err := rows.Err(); err != nil {
+		return feed, 0, 0
+	}
+
+	count = len(feed)
+
+	return feed, total, count
 }
 
 //GetArticleByID get article by id
 func GetArticleByID(id int) (article model.Article, err error) {
+	row := app.DB.QueryRow("select id, title, content from articles where id = ?", id)
 
-	if err := app.DB.Table("articles").Where("id = ?", id).Find(&article).Error; err != nil {
-		return article, err
+	if err := row.Scan(&article.ID, &article.Title, &article.Content); err != nil {
+		if err == sql.ErrNoRows {
+			return article, errors.New("article not found")
+		}
+
+		return article, fmt.Errorf("articleById %d: %v", id, err)
 	}
 
 	return article, nil
 }
 
 //AddArticle add article
-func AddArticle(article model.Article) (value interface{}) {
+func AddArticle(article model.Article) (value interface{}, err error) {
+	if article.Title == "" {
+		return nil, errors.New("title is required")
+	}
 
-	article.Content = util.Sanitize(article.Content)
+	// article.Content = util.Sanitize(article.Content)
 	excerpt := []rune(util.ExtractText(article.Content))
 
 	if len(excerpt) > 40 {
@@ -44,7 +71,16 @@ func AddArticle(article model.Article) (value interface{}) {
 
 	article.Excerpt = string(excerpt)
 
-	record := app.DB.Table("articles").Create(&article)
+	result, err := app.DB.Exec("insert into articles (title, content,excerpt) values (?, ?, ?)", article.Title, article.Content, article.Excerpt)
 
-	return record.Value
+	if err != nil {
+		return 0, fmt.Errorf("addArticle: %v", err)
+	}
+	id, err := result.LastInsertId()
+
+	if err != nil {
+		return 0, fmt.Errorf("addArticle: %v", err)
+	}
+	return id, nil
+
 }

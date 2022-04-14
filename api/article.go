@@ -28,6 +28,8 @@ func GetArticle(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "article not found",
 		})
+
+		return
 	}
 
 	c.JSON(http.StatusOK, article)
@@ -58,7 +60,15 @@ func AddArticle(c *gin.Context) {
 		log.Println(err)
 	}
 
-	savedArticle := service.AddArticle(article)
+	savedArticle, err := service.AddArticle(article)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
 
 	c.JSON(http.StatusOK, savedArticle)
 }
