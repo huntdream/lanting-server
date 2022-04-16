@@ -11,7 +11,7 @@ create table if not exists articles
     author_id  int      default 1 null,
     deleted_at datetime           null,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at datetime default null on update CURRENT_TIMESTAMP
+    updated_at datetime default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
 );
 
 create table if not exists users
