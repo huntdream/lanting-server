@@ -12,5 +12,6 @@ func Register(router *gin.Engine) {
 		registerArticle(v1)
 		registerUser(v1)
 		registerAuth(v1)
+		registerTools(v1)
 	}
 }

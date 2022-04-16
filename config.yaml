@@ -7,5 +7,6 @@ database:
   passwd: ''
 
 storage:
+  Bucket: ''
   AccessKey: ''
   SecretKey: ''

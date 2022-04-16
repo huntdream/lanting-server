@@ -22,6 +22,7 @@ type DatabaseConf struct {
 
 // StorageConf
 type StorageConf struct {
+	Bucket    string
 	AccessKey string
 	SecretKey string
 }
