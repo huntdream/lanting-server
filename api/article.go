@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,7 +13,7 @@ import (
 
 //GetArticle get article by id
 func GetArticle(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -25,6 +26,7 @@ func GetArticle(c *gin.Context) {
 	article, err := service.GetArticleByID(id)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "article not found",
 		})
@@ -61,6 +63,33 @@ func AddArticle(c *gin.Context) {
 	}
 
 	savedArticle, err := service.AddArticle(article)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, savedArticle)
+}
+
+//UpdateArticle update article
+func UpdateArticle(c *gin.Context) {
+	var article model.Article
+
+	if err := c.ShouldBind(&article); err != nil {
+		log.Println(err)
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	savedArticle, err := service.UpdateArticle(article)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
