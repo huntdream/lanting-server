@@ -15,7 +15,7 @@ func Initialize() {
 	username := app.Config.Database.User
 	passwd := app.Config.Database.Passwd
 
-	dsl := username + ":" + passwd + "@/" + name + "?charset=utf8&parseTime=True&loc=Local"
+	dsl := username + ":" + passwd + "@/" + name + "?charset=utf8mb4&parseTime=True&loc=Local"
 
 	db, err := sql.Open("mysql", dsl)
 
