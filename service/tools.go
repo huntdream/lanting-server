@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +20,10 @@ func GetUploadToken(c *gin.Context) {
 		Scope:      bucket,
 		ReturnBody: `{"key":"$(key)","hash":"$(etag)","size":$(fsize),"name":"$(fname)","type": $(mimeType),"width": $(imageInfo.width),"height": $(imageInfo.height)}`,
 	}
+
 	mac := qbox.NewMac(accessKey, secretKey)
 	upToken := putPolicy.UploadToken(mac)
 
-	fmt.Println(upToken)
 	c.JSON(http.StatusOK, gin.H{
 		"token": upToken,
 	})
