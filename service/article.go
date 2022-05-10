@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/huntdream/lanting-server/app"
 	"github.com/huntdream/lanting-server/model"
 )
@@ -32,6 +33,8 @@ func GetArticles(size string, after string) (feed []model.Article, total int, co
 	}
 
 	if err := rows.Err(); err != nil {
+		fmt.Println(err.Error())
+
 		return feed, 0, 0
 	}
 
@@ -42,15 +45,24 @@ func GetArticles(size string, after string) (feed []model.Article, total int, co
 
 //GetArticleByID get article by id
 func GetArticleByID(id int64) (article model.Article, err error) {
-	row := app.DB.QueryRow("select id, title, excerpt, content, created_at, updated_at from articles where id = ?", id)
+	row := app.DB.QueryRow("select id, title, author_id, excerpt, content, created_at, updated_at from articles where id = ?", id)
 
-	if err := row.Scan(&article.ID, &article.Title, &article.Excerpt, &article.Content, &article.CreatedAt, &article.UpdatedAt); err != nil {
+	if err := row.Scan(&article.ID, &article.Title, &article.AuthorId, &article.Excerpt, &article.Content, &article.CreatedAt, &article.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return article, errors.New("article not found")
 		}
 
 		return article, fmt.Errorf("articleById %d: %v", id, err)
 	}
+
+	user, err := FindUserById(article.AuthorId)
+
+	if err != nil {
+		return article, nil
+	}
+
+	article.Author.ID = user.ID
+	article.Author.Username = user.Username
 
 	return article, nil
 }
@@ -61,7 +73,7 @@ func AddArticle(article model.Article) (value interface{}, err error) {
 		return nil, errors.New("title is required")
 	}
 
-	result, err := app.DB.Exec("insert into articles (title, content,excerpt) values (?, ?, ?)", article.Title, article.Content, article.Excerpt)
+	result, err := app.DB.Exec("insert into articles (title, content, author_id, excerpt) values (?, ? ,? ,?)", article.Title, article.Content, article.AuthorId, article.Excerpt)
 
 	if err != nil {
 		return 0, fmt.Errorf("addArticle: %v", err)
@@ -79,14 +91,31 @@ func AddArticle(article model.Article) (value interface{}, err error) {
 }
 
 //UpdateArticle update article
-func UpdateArticle(article model.Article) (value interface{}, err error) {
-	if article.ID == 0 {
+func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{}, err error) {
+	user := GetCurrentUser(c)
+
+	if newArticle.ID == 0 {
 		return nil, errors.New("id is required")
 	}
 
-	if article.Title == "" {
-		return nil, errors.New("title is required")
+	if newArticle.Title == "" {
+		return nil, errors.New("Title is required")
 	}
+
+	article, err := GetArticleByID(newArticle.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user.ID != article.AuthorId {
+		fmt.Println("suerid", user.ID, article.AuthorId)
+		return nil, errors.New("You are not allow to edit others' article ")
+	}
+
+	article.Title = newArticle.Title
+	article.Content = newArticle.Content
+	article.Excerpt = newArticle.Excerpt
 
 	_, err = app.DB.Exec("update articles set title = ?, content = ?, excerpt = ? where id = ?", article.Title, article.Content, article.Excerpt, article.ID)
 

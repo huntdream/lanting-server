@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/huntdream/lanting-server/app"
 	"github.com/huntdream/lanting-server/model"
+	"github.com/huntdream/lanting-server/util"
 )
 
 // CreateUser create user
@@ -31,11 +33,11 @@ func CreateUser(c *gin.Context) {
 	return
 }
 
-//FindUser find user by username
-func FindUser(username string) (user model.User, err error) {
-	row := app.DB.QueryRow("select username, password from users where username = ?", username)
+//FindUserByUsername find user by username
+func FindUserByUsername(username string) (user model.User, err error) {
+	row := app.DB.QueryRow("select id, username, password from users where username = ?", username)
 
-	if err := row.Scan(&user.Username, &user.Password); err != nil {
+	if err := row.Scan(&user.ID, &user.Username, &user.Password); err != nil {
 		if err == sql.ErrNoRows {
 			return user, fmt.Errorf("user not found")
 		}
@@ -44,4 +46,63 @@ func FindUser(username string) (user model.User, err error) {
 	}
 
 	return user, nil
+}
+
+//FindUserById find user by id
+func FindUserById(id int) (user model.User, err error) {
+	row := app.DB.QueryRow("select id, username from users where id = ?", id)
+
+	if err := row.Scan(&user.ID, &user.Username); err != nil {
+		if err == sql.ErrNoRows {
+			return user, fmt.Errorf("user not found")
+		}
+
+		return user, fmt.Errorf("FindUser %v", err)
+	}
+
+	return user, nil
+}
+
+//GetCurrentUser get current user
+func GetCurrentUser(c *gin.Context) (user model.User) {
+	authorization := c.GetHeader("Authorization")
+
+	//check if Authorization header provided
+	if authorization == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+
+		c.Abort()
+
+		return
+	}
+
+	token := strings.TrimPrefix(authorization, "Bearer ")
+
+	//check if token provided
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+
+		c.Abort()
+
+		return
+	}
+
+	//parse token
+	username, err := util.ParseToken(token)
+
+	if err != nil {
+		return
+	}
+
+	user, err = FindUserByUsername(username)
+
+	if err != nil {
+		return
+	}
+
+	return user
 }

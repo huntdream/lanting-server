@@ -27,7 +27,7 @@ func SignUp(c *gin.Context) {
 		})
 	}
 
-	_, err := FindUser(userInfo.Username)
+	_, err := FindUserByUsername(userInfo.Username)
 
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -54,7 +54,7 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	user, err := FindUser(userInfo.Username)
+	user, err := FindUserByUsername(userInfo.Username)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -96,7 +96,7 @@ func SignIn(c *gin.Context) {
 	}
 
 	//get user by username from database
-	user, err := FindUser(userInfo.Username)
+	user, err := FindUserByUsername(userInfo.Username)
 
 	//check if user exists in database
 	if err != nil {

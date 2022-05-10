@@ -59,7 +59,7 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		user, err := service.FindUser(username)
+		user, err := service.FindUserByUsername(username)
 
 		if (user == model.User{} || err != nil) {
 			c.JSON(http.StatusUnauthorized, gin.H{

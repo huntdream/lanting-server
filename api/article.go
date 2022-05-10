@@ -24,6 +24,9 @@ func GetArticle(c *gin.Context) {
 	}
 
 	article, err := service.GetArticleByID(id)
+	user := service.GetCurrentUser(c)
+
+	article.CanEdit = article.AuthorId == user.ID
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -62,6 +65,10 @@ func AddArticle(c *gin.Context) {
 		log.Println(err)
 	}
 
+	author := service.GetCurrentUser(c)
+	fmt.Println(author, "???")
+	article.AuthorId = author.ID
+
 	savedArticle, err := service.AddArticle(article)
 
 	if err != nil {
@@ -89,7 +96,7 @@ func UpdateArticle(c *gin.Context) {
 		return
 	}
 
-	savedArticle, err := service.UpdateArticle(article)
+	savedArticle, err := service.UpdateArticle(c, article)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
