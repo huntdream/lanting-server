@@ -37,6 +37,8 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
+	userInfo.Password = hashPassword(userInfo.Password)
+
 	result, err := app.DB.Exec("insert into users (username, password) values (?,? )", userInfo.Username, userInfo.Password)
 
 	id, err := result.LastInsertId()
@@ -109,6 +111,7 @@ func SignIn(c *gin.Context) {
 
 	//check if password provided match the database record
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInfo.Password)); err != nil {
+		fmt.Println(err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "username and password not match",
 		})
