@@ -65,43 +65,32 @@ func FindUserById(id int) (user model.User, err error) {
 
 //GetCurrentUser get current user
 func GetCurrentUser(c *gin.Context) (user model.User) {
+	user = model.User{}
 	authorization := c.GetHeader("Authorization")
 
 	//check if Authorization header provided
 	if authorization == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
-		})
-
-		c.Abort()
-
-		return
+		return user
 	}
 
 	token := strings.TrimPrefix(authorization, "Bearer ")
 
 	//check if token provided
 	if token == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
-		})
-
-		c.Abort()
-
-		return
+		return user
 	}
 
 	//parse token
 	username, err := util.ParseToken(token)
 
 	if err != nil {
-		return
+		return user
 	}
 
 	user, err = FindUserByUsername(username)
 
 	if err != nil {
-		return
+		return user
 	}
 
 	return user
