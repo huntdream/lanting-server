@@ -99,7 +99,7 @@ func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{},
 	}
 
 	if newArticle.Title == "" {
-		return nil, errors.New("Title is required")
+		return nil, errors.New("title is required")
 	}
 
 	article, err := GetArticleByID(newArticle.ID)
@@ -109,8 +109,7 @@ func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{},
 	}
 
 	if user.ID != article.AuthorId {
-		fmt.Println("suerid", user.ID, article.AuthorId)
-		return nil, errors.New("You are not allow to edit others' article ")
+		return nil, errors.New("permission denied")
 	}
 
 	article.Title = newArticle.Title

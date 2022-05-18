@@ -9,7 +9,7 @@ import (
 	"github.com/qiniu/go-sdk/v7/storage"
 )
 
-// Get qiniu upload token
+// GetUploadToken Get qiniu upload token
 func GetUploadToken(c *gin.Context) {
 	bucket := app.Config.Storage.Bucket
 

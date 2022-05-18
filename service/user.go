@@ -16,19 +16,27 @@ import (
 func CreateUser(c *gin.Context) {
 	var user model.User
 
-	if err := (c.ShouldBindJSON(&user)); err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid params",
+			"message": err.Error(),
 		})
 
 		return
 	}
 
-	app.DB.Exec("insert into users (username, password) values (?,? )", user.Username, user.Password)
+	_, err := app.DB.Exec("insert into users (username, password) values (?,? )", user.Username, user.Password)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
 
 	fmt.Println(user)
 
-	c.JSON(200, user)
+	c.JSON(http.StatusOK, user)
 
 	return
 }

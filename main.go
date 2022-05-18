@@ -14,11 +14,15 @@ func main() {
 	router.RemoveExtraSlash = true
 	app.Config = config.ReadConfiguration()
 
+	db.Initialize()
+
 	middleware.EnableMiddleware(router)
 
 	routes.Register(router)
 
-	db.Initialize()
+	err := router.Run(":" + app.Config.Server.Port)
 
-	router.Run(":" + app.Config.Server.Port)
+	if err != nil {
+		return
+	}
 }

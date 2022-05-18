@@ -15,7 +15,7 @@ type Article struct {
 	Base
 }
 
-// Feed Item
+// FeedItem Feed Item
 type FeedItem struct {
 	ID      int64  `json:"id" gorm:"PRIMARY_KEY"`
 	Title   string `json:"title"`
