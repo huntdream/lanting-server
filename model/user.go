@@ -4,9 +4,9 @@ package model
 type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username" binding:"required"`
-	Name     string `json:"name" gorm:"default:'null'"`
-	Email    string `form:"email" json:"email" gorm:"default:'null'"`
-	Bio      string `json:"bio" gorm:"default:'null'"`
+	Name     string `json:"name"`
+	Email    string `form:"email" json:"email"`
+	Bio      string `json:"bio"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -14,9 +14,9 @@ type User struct {
 type UserRequest struct {
 	ID       int    `json:"id"`
 	Username string `json:"username" binding:"required"`
-	Name     string `json:"name" gorm:"default:'null'"`
-	Email    string `form:"email" json:"email" gorm:"default:'null'"`
-	Bio      string `json:"bio" gorm:"default:'null'"`
+	Name     string `json:"name"`
+	Email    string `form:"email" json:"email"`
+	Bio      string `json:"bio"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -24,7 +24,7 @@ type UserRequest struct {
 type UserResponse struct {
 	ID       int    `json:"id"`
 	Username string `json:"username" binding:"required"`
-	Name     string `json:"name" gorm:"default:'null'"`
-	Email    string `form:"email" json:"email" gorm:"default:'null'"`
-	Bio      string `json:"bio" gorm:"default:'null'"`
+	Name     string `json:"name" `
+	Email    string `form:"email" json:"email" `
+	Bio      string `json:"bio" `
 }

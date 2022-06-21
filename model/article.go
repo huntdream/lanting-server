@@ -2,7 +2,7 @@ package model
 
 //Article model
 type Article struct {
-	ID       int64  `json:"id" gorm:"PRIMARY_KEY"`
+	ID       int64  `json:"id"`
 	Title    string `json:"title"`
 	AuthorId int    `json:"authorId"`
 	Content  string `json:"content"`
@@ -17,7 +17,7 @@ type Article struct {
 
 // FeedItem Feed Item
 type FeedItem struct {
-	ID      int64  `json:"id" gorm:"PRIMARY_KEY"`
+	ID      int64  `json:"id"`
 	Title   string `json:"title"`
 	Excerpt string `json:"excerpt"`
 }
