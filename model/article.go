@@ -4,12 +4,12 @@ package model
 type Article struct {
 	ID       int64  `json:"id"`
 	Title    string `json:"title"`
-	AuthorId int    `json:"authorId"`
+	AuthorId int64  `json:"authorId"`
 	Content  string `json:"content"`
 	Excerpt  string `json:"excerpt"`
 	CanEdit  bool   `json:"canEdit"`
 	Author   struct {
-		ID       int    `json:"id"`
+		ID       int64  `json:"id"`
 		Username string `json:"username"`
 	} `json:"author"`
 	Base

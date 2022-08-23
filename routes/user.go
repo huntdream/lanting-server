@@ -10,5 +10,6 @@ func registerUser(router *gin.RouterGroup) {
 	user := router.Group("/user")
 	{
 		user.POST("", service.CreateUser)
+		user.GET("/:id", service.GetUserById)
 	}
 }

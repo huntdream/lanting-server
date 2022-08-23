@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -57,10 +58,10 @@ func FindUserByUsername(username string) (user model.User, err error) {
 }
 
 //FindUserById find user by id
-func FindUserById(id int) (user model.User, err error) {
-	row := app.DB.QueryRow("select id, username from users where id = ?", id)
+func FindUserById(id int64) (user model.UserResult, err error) {
+	row := app.DB.QueryRow("select id, username, avatar, name from users where id = ?", id)
 
-	if err := row.Scan(&user.ID, &user.Username); err != nil {
+	if err := row.Scan(&user.ID, &user.Username, &user.Avatar, &user.Name); err != nil {
 		if err == sql.ErrNoRows {
 			return user, fmt.Errorf("user not found")
 		}
@@ -102,4 +103,38 @@ func GetCurrentUser(c *gin.Context) (user model.User) {
 	}
 
 	return user
+}
+
+// GetUserById Get user by ID
+func GetUserById(c *gin.Context) {
+	var user = model.UserResult{}
+
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	user, err = FindUserById(id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	if user.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "user not found",
+		})
+	}
+
+	c.JSON(http.StatusOK, user)
+	return
 }
