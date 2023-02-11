@@ -44,9 +44,9 @@ func CreateUser(c *gin.Context) {
 
 //FindUserByUsername find user by username
 func FindUserByUsername(username string) (user model.User, err error) {
-	row := app.DB.QueryRow("select id, username, password from users where username = ?", username)
+	row := app.DB.QueryRow("select id, username, password, avatar from users where username = ?", username)
 
-	if err := row.Scan(&user.ID, &user.Username, &user.Password); err != nil {
+	if err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Avatar); err != nil {
 		if err == sql.ErrNoRows {
 			return user, fmt.Errorf("user not found")
 		}
@@ -58,7 +58,7 @@ func FindUserByUsername(username string) (user model.User, err error) {
 }
 
 //FindUserById find user by id
-func FindUserById(id int64) (user model.UserResult, err error) {
+func FindUserById(id int64) (user model.User, err error) {
 	row := app.DB.QueryRow("select id, username, avatar, name from users where id = ?", id)
 
 	if err := row.Scan(&user.ID, &user.Username, &user.Avatar, &user.Name); err != nil {
@@ -107,7 +107,7 @@ func GetCurrentUser(c *gin.Context) (user model.User) {
 
 // GetUserById Get user by ID
 func GetUserById(c *gin.Context) {
-	var user = model.UserResult{}
+	var user = model.User{}
 
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 

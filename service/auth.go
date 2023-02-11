@@ -71,12 +71,8 @@ func SignUp(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, model.AuthResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		Name:     user.Name,
-		Bio:      user.Bio,
-		Email:    user.Email,
-		Token:    token,
+		User:  user,
+		Token: token,
 	})
 
 	return
@@ -128,12 +124,8 @@ func SignIn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, model.AuthResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		Name:     user.Name,
-		Bio:      user.Bio,
-		Email:    user.Email,
-		Token:    token,
+		User:  user,
+		Token: token,
 	})
 
 	return

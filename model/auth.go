@@ -8,10 +8,6 @@ type AuthRequest struct {
 
 //AuthResponse response for auth
 type AuthResponse struct {
-	ID       int64  `json:"id"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Bio      string `json:"bio"`
-	Email    string `json:"email"`
-	Token    string `json:"token"`
+	User
+	Token string `json:"token"`
 }

@@ -66,7 +66,11 @@ func AddArticle(c *gin.Context) {
 	}
 
 	author := service.GetCurrentUser(c)
-	fmt.Println(author, "???")
+
+	if author.ID == 0 {
+		return
+	}
+
 	article.AuthorId = author.ID
 
 	savedArticle, err := service.AddArticle(article)
