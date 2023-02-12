@@ -47,7 +47,7 @@ func JWT() gin.HandlerFunc {
 		}
 
 		//parse token
-		username, err := util.ParseToken(token)
+		userId, _, err := util.ParseToken(token)
 
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -59,7 +59,7 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		user, err := service.FindUserByUsername(username)
+		user, err := service.FindUserById(userId)
 
 		if (user == model.User{} || err != nil) {
 			c.JSON(http.StatusUnauthorized, gin.H{

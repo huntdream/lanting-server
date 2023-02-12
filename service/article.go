@@ -11,8 +11,8 @@ import (
 )
 
 //GetArticles get articles
-func GetArticles(size string, after string) (feed []model.Article, total int, count int) {
-	rows, err := app.DB.Query("select id, title, excerpt, created_at from articles order by id desc")
+func GetArticles(userId int64, size string, after string) (feed []model.Article, total int, count int) {
+	rows, err := app.DB.Query("select id, title, excerpt, visibility, created_at from articles where visibility=1 or author_id=? order by id desc", userId)
 
 	if err != nil {
 		return feed, 0, 0
@@ -23,7 +23,7 @@ func GetArticles(size string, after string) (feed []model.Article, total int, co
 	for rows.Next() {
 		var article model.Article
 
-		if err = rows.Scan(&article.ID, &article.Title, &article.Excerpt, &article.CreatedAt); err != nil {
+		if err = rows.Scan(&article.ID, &article.Title, &article.Excerpt, &article.Visibility, &article.CreatedAt); err != nil {
 			fmt.Println(article.Title, err.Error())
 
 			return feed, 0, 0
@@ -45,9 +45,9 @@ func GetArticles(size string, after string) (feed []model.Article, total int, co
 
 //GetArticleByID get article by id
 func GetArticleByID(id int64) (article model.Article, err error) {
-	row := app.DB.QueryRow("select id, title, author_id, excerpt, content, created_at, updated_at from articles where id = ?", id)
+	row := app.DB.QueryRow("select id, title, author_id, excerpt, content, visibility, created_at, updated_at from articles where id = ?", id)
 
-	if err := row.Scan(&article.ID, &article.Title, &article.AuthorId, &article.Excerpt, &article.Content, &article.CreatedAt, &article.UpdatedAt); err != nil {
+	if err := row.Scan(&article.ID, &article.Title, &article.AuthorId, &article.Excerpt, &article.Content, &article.Visibility, &article.CreatedAt, &article.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return article, errors.New("article not found")
 		}
@@ -73,7 +73,7 @@ func AddArticle(article model.Article) (value interface{}, err error) {
 		return nil, errors.New("title is required")
 	}
 
-	result, err := app.DB.Exec("insert into articles (title, content, author_id, excerpt) values (?, ? ,? ,?)", article.Title, article.Content, article.AuthorId, article.Excerpt)
+	result, err := app.DB.Exec("insert into articles (title, content, author_id, excerpt, visibility) values (?,?,?,?,?)", article.Title, article.Content, article.AuthorId, article.Excerpt, article.Visibility)
 
 	if err != nil {
 		return 0, fmt.Errorf("addArticle: %v", err)
@@ -115,8 +115,9 @@ func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{},
 	article.Title = newArticle.Title
 	article.Content = newArticle.Content
 	article.Excerpt = newArticle.Excerpt
+	article.Visibility = newArticle.Visibility
 
-	_, err = app.DB.Exec("update articles set title = ?, content = ?, excerpt = ? where id = ?", article.Title, article.Content, article.Excerpt, article.ID)
+	_, err = app.DB.Exec("update articles set title = ?, content = ?, excerpt = ?, visibility = ? where id = ?", article.Title, article.Content, article.Excerpt, article.Visibility, article.ID)
 
 	if err != nil {
 		return 0, fmt.Errorf("updateArticle: %v", err)

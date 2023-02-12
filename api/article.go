@@ -42,11 +42,12 @@ func GetArticle(c *gin.Context) {
 
 //GetArticles get articles
 func GetArticles(c *gin.Context) {
+	userId := c.GetInt64("userId")
 
 	size := c.DefaultQuery("size", "10")
 	after := c.DefaultQuery("after", "0")
 
-	articles, total, count := service.GetArticles(size, after)
+	articles, total, count := service.GetArticles(userId, size, after)
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":  articles,
@@ -60,6 +61,7 @@ func GetArticles(c *gin.Context) {
 //AddArticle add article
 func AddArticle(c *gin.Context) {
 	var article model.Article
+	authorId := c.GetInt64("userId")
 
 	if err := c.ShouldBind(&article); err != nil {
 		log.Println(err)
@@ -71,7 +73,7 @@ func AddArticle(c *gin.Context) {
 		return
 	}
 
-	article.AuthorId = author.ID
+	article.AuthorId = authorId
 
 	savedArticle, err := service.AddArticle(article)
 

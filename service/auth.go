@@ -19,7 +19,7 @@ func hashPassword(password string) string {
 
 //SignUp sign up
 func SignUp(c *gin.Context) {
-	var userInfo model.AuthRequest
+	var userInfo model.User
 
 	if err := c.ShouldBind(&userInfo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -62,7 +62,7 @@ func SignUp(c *gin.Context) {
 		})
 	}
 
-	token, err := util.GenerateToken(userInfo.Username)
+	token, err := util.GenerateToken(userInfo)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -80,7 +80,7 @@ func SignUp(c *gin.Context) {
 
 //SignIn sign in
 func SignIn(c *gin.Context) {
-	var userInfo model.AuthRequest
+	var userInfo model.User
 
 	//get user provided info
 	if err := c.ShouldBind(&userInfo); err != nil {
@@ -115,13 +115,15 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
-	token, err := util.GenerateToken(userInfo.Username)
+	token, err := util.GenerateToken(user)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 	}
+
+	user.Password = ""
 
 	c.JSON(http.StatusOK, model.AuthResponse{
 		User:  user,

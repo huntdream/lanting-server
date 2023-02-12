@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/huntdream/lanting-server/model"
 	"log"
 	"time"
 
@@ -12,16 +13,18 @@ var jwtKey = []byte("my_secret_key")
 //Claims JWT claims
 type Claims struct {
 	Username string `json:"username"`
+	ID       int64  `json:"id"`
 	jwt.StandardClaims
 }
 
 //GenerateToken generate jwt token
-func GenerateToken(username string) (tokenString string, err error) {
+func GenerateToken(user model.User) (tokenString string, err error) {
 	//the token expiration time
 	expirationTime := time.Now().Add(500 * time.Hour)
 
 	claims := Claims{
-		Username: username,
+		Username: user.Username,
+		ID:       user.ID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -39,7 +42,7 @@ func GenerateToken(username string) (tokenString string, err error) {
 }
 
 //ParseToken parse jwt token
-func ParseToken(tokenString string) (username string, err error) {
+func ParseToken(tokenString string) (userId int64, username string, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
@@ -47,12 +50,9 @@ func ParseToken(tokenString string) (username string, err error) {
 	claims := token.Claims.(*Claims)
 
 	username = claims.Username
+	userId = claims.ID
 
 	log.Println(username, claims.StandardClaims.IssuedAt, claims.StandardClaims.ExpiresAt)
 
-	if err != nil {
-		return username, err
-	}
-
-	return username, nil
+	return userId, username, err
 }

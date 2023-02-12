@@ -90,13 +90,13 @@ func GetCurrentUser(c *gin.Context) (user model.User) {
 	}
 
 	//parse token
-	username, err := util.ParseToken(token)
+	userId, _, err := util.ParseToken(token)
 
 	if err != nil {
 		return user
 	}
 
-	user, err = FindUserByUsername(username)
+	user, err = FindUserById(userId)
 
 	if err != nil {
 		return user
