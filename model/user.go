@@ -8,5 +8,5 @@ type User struct {
 	Avatar   string `json:"avatar"`
 	Email    string `form:"email,omitempty" json:"email"`
 	Bio      string `json:"bio"`
-	Password string `json:"password,omitempty" binding:"required"`
+	Password string `json:"password,omitempty"`
 }
