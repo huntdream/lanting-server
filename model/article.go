@@ -9,10 +9,7 @@ type Article struct {
 	Excerpt    string `json:"excerpt"`
 	CanEdit    bool   `json:"canEdit"`
 	Visibility int64  `json:"visibility"`
-	Author     struct {
-		ID       int64  `json:"id"`
-		Username string `json:"username"`
-	} `json:"author"`
+	Author     User   `json:"author"`
 	Base
 }
 

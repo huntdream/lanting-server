@@ -12,7 +12,7 @@ import (
 
 //GetArticles get articles
 func GetArticles(userId int64, size string, after string) (feed []model.Article, total int, count int) {
-	rows, err := app.DB.Query("select id, title, excerpt, visibility, created_at from articles where visibility=1 or author_id=? order by id desc", userId)
+	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where visibility=1 or author_id=? order by id desc", userId)
 
 	if err != nil {
 		return feed, 0, 0
@@ -23,11 +23,19 @@ func GetArticles(userId int64, size string, after string) (feed []model.Article,
 	for rows.Next() {
 		var article model.Article
 
-		if err = rows.Scan(&article.ID, &article.Title, &article.Excerpt, &article.Visibility, &article.CreatedAt); err != nil {
+		if err = rows.Scan(&article.ID, &article.Title, &article.Excerpt, &article.Visibility, &article.AuthorId, &article.CreatedAt); err != nil {
 			fmt.Println(article.Title, err.Error())
 
 			return feed, 0, 0
 		}
+
+		author, err := FindUserById(article.AuthorId)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		article.Author = author
 
 		feed = append(feed, article)
 	}
