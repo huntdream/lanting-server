@@ -69,8 +69,7 @@ func GetArticleByID(id int64) (article model.Article, err error) {
 		return article, nil
 	}
 
-	article.Author.ID = user.ID
-	article.Author.Username = user.Username
+	article.Author = user
 
 	return article, nil
 }
