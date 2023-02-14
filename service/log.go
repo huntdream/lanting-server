@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/huntdream/lanting-server/app"
+	"strings"
 	"time"
 )
 
@@ -21,10 +22,13 @@ func AddLog(c *gin.Context) {
 	userAgent := c.GetHeader("User-Agent")
 	method := c.Request.Method
 	path := c.Request.URL.Path
+	userId := c.GetInt64("userId")
 
-	_, err := app.DB.Exec("insert into logs (ip, ua, method, time, path) values (?, ? ,? ,? ,?)", remoteAddr, userAgent, method, time.Now(), path)
-	if err != nil {
-		fmt.Println(err.Error())
+	if strings.HasPrefix(path, "/api/v1") {
+		_, err := app.DB.Exec("insert into logs (user_id,ip, ua, method, time, path) values (?, ?, ? ,? ,? ,?)", userId, remoteAddr, userAgent, method, time.Now(), path)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
 
 	c.Next()
