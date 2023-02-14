@@ -99,7 +99,7 @@ func AddArticle(article model.Article) (value interface{}, err error) {
 
 //UpdateArticle update article
 func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{}, err error) {
-	user := GetCurrentUser(c)
+	useId := c.GetInt64("userId")
 
 	if newArticle.ID == 0 {
 		return nil, errors.New("id is required")
@@ -115,7 +115,7 @@ func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{},
 		return nil, err
 	}
 
-	if user.ID != article.AuthorId {
+	if useId != article.AuthorId {
 		return nil, errors.New("permission denied")
 	}
 

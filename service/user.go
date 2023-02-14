@@ -3,14 +3,11 @@ package service
 import (
 	"database/sql"
 	"fmt"
-	"net/http"
-	"strconv"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/huntdream/lanting-server/app"
 	"github.com/huntdream/lanting-server/model"
-	"github.com/huntdream/lanting-server/util"
+	"net/http"
+	"strconv"
 )
 
 // CreateUser create user
@@ -73,36 +70,19 @@ func FindUserById(id int64) (user model.User, err error) {
 }
 
 //GetCurrentUser get current user
-func GetCurrentUser(c *gin.Context) (user model.User) {
-	user = model.User{}
-	authorization := c.GetHeader("Authorization")
+func GetCurrentUser(c *gin.Context) {
+	userId := c.GetInt64("userId")
 
-	//check if Authorization header provided
-	if authorization == "" {
-		return user
-	}
-
-	token := strings.TrimPrefix(authorization, "Bearer ")
-
-	//check if token provided
-	if token == "" {
-		return user
-	}
-
-	//parse token
-	userId, _, err := util.ParseToken(token)
+	user, err := FindUserById(userId)
 
 	if err != nil {
-		return user
+		c.JSON(http.StatusOK, user)
+		return
 	}
 
-	user, err = FindUserById(userId)
+	c.JSON(http.StatusOK, user)
 
-	if err != nil {
-		return user
-	}
-
-	return user
+	return
 }
 
 // GetUserById Get user by ID

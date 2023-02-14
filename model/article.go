@@ -9,6 +9,6 @@ type Article struct {
 	Excerpt    string `json:"excerpt"`
 	CanEdit    bool   `json:"canEdit"`
 	Visibility int64  `json:"visibility"`
-	Author     User   `json:"author"`
+	Author     User   `json:"author" binding:"-"`
 	Base
 }

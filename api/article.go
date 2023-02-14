@@ -14,6 +14,7 @@ import (
 //GetArticle get article by id
 func GetArticle(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	userId := c.GetInt64("userId")
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -24,7 +25,7 @@ func GetArticle(c *gin.Context) {
 	}
 
 	article, err := service.GetArticleByID(id)
-	user := service.GetCurrentUser(c)
+	user, _ := service.FindUserById(userId)
 
 	article.CanEdit = article.AuthorId == user.ID
 
@@ -65,12 +66,6 @@ func AddArticle(c *gin.Context) {
 
 	if err := c.ShouldBind(&article); err != nil {
 		log.Println(err)
-	}
-
-	author := service.GetCurrentUser(c)
-
-	if author.ID == 0 {
-		return
 	}
 
 	article.AuthorId = authorId
