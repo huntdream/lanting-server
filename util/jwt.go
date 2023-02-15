@@ -1,11 +1,10 @@
 package util
 
 import (
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/huntdream/lanting-server/model"
 	"log"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 var jwtKey = []byte("my_secret_key")
@@ -14,7 +13,7 @@ var jwtKey = []byte("my_secret_key")
 type Claims struct {
 	Username string `json:"username"`
 	ID       int64  `json:"id"`
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 //GenerateToken generate jwt token
@@ -25,8 +24,8 @@ func GenerateToken(user model.User) (tokenString string, err error) {
 	claims := Claims{
 		Username: user.Username,
 		ID:       user.ID,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 	}
 
@@ -52,7 +51,7 @@ func ParseToken(tokenString string) (userId int64, username string, err error) {
 	username = claims.Username
 	userId = claims.ID
 
-	log.Println(username, claims.StandardClaims.IssuedAt, claims.StandardClaims.ExpiresAt)
+	log.Println(username, claims.RegisteredClaims.IssuedAt, claims.RegisteredClaims.ExpiresAt)
 
 	return userId, username, err
 }

@@ -3,9 +3,9 @@ module github.com/huntdream/lanting-server
 go 1.13
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/microcosm-cc/bluemonday v1.0.3
 	github.com/qiniu/go-sdk/v7 v7.11.1
 	github.com/spf13/viper v1.10.1
