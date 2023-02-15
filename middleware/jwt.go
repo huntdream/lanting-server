@@ -10,7 +10,7 @@ import (
 	"github.com/huntdream/lanting-server/util"
 )
 
-//JWT middleware
+// JWT middleware
 func JWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -65,6 +65,8 @@ func JWT() gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "user not found",
 			})
+
+			c.Abort()
 
 			return
 		}

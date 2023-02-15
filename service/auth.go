@@ -17,7 +17,7 @@ func hashPassword(password string) string {
 	return string(hashed)
 }
 
-//SignUp sign up
+// SignUp sign up
 func SignUp(c *gin.Context) {
 	var userInfo model.User
 
@@ -41,6 +41,14 @@ func SignUp(c *gin.Context) {
 
 	result, err := app.DB.Exec("insert into users (username, password) values (?,? )", userInfo.Username, userInfo.Password)
 
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
 	id, err := result.LastInsertId()
 
 	if err != nil {
@@ -54,7 +62,7 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	user, err := FindUserByUsername(userInfo.Username)
+	user, err := FindUserById(id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -62,7 +70,7 @@ func SignUp(c *gin.Context) {
 		})
 	}
 
-	token, err := util.GenerateToken(userInfo)
+	token, err := util.GenerateToken(user)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -78,7 +86,7 @@ func SignUp(c *gin.Context) {
 	return
 }
 
-//SignIn sign in
+// SignIn sign in
 func SignIn(c *gin.Context) {
 	var userInfo model.User
 
