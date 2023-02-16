@@ -25,6 +25,8 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
+
+		return
 	}
 
 	_, err := FindUserByUsername(userInfo.Username)
