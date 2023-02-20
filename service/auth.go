@@ -88,8 +88,8 @@ func SignUp(c *gin.Context) {
 	return
 }
 
-// SignIn sign in
-func SignIn(c *gin.Context) {
+// Login log in
+func Login(c *gin.Context) {
 	var userInfo model.User
 
 	//get user provided info
