@@ -39,7 +39,7 @@ func CreateUser(c *gin.Context) {
 	return
 }
 
-//FindUserByUsername find user by username
+// FindUserByUsername find user by username
 func FindUserByUsername(username string) (user model.User, err error) {
 	row := app.DB.QueryRow("select id, username, password, avatar from users where username = ?", username)
 
@@ -54,7 +54,7 @@ func FindUserByUsername(username string) (user model.User, err error) {
 	return user, nil
 }
 
-//FindUserById find user by id
+// FindUserById find user by id
 func FindUserById(id int64) (user model.User, err error) {
 	row := app.DB.QueryRow("select id, username, avatar, name from users where id = ?", id)
 
@@ -69,7 +69,7 @@ func FindUserById(id int64) (user model.User, err error) {
 	return user, nil
 }
 
-//GetCurrentUser get current user
+// GetCurrentUser get current user
 func GetCurrentUser(c *gin.Context) {
 	userId := c.GetInt64("userId")
 
