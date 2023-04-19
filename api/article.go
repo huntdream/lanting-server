@@ -11,7 +11,7 @@ import (
 	"github.com/huntdream/lanting-server/service"
 )
 
-//GetArticle get article by id
+// GetArticle get article by id
 func GetArticle(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	userId := c.GetInt64("userId")
@@ -25,6 +25,15 @@ func GetArticle(c *gin.Context) {
 	}
 
 	article, err := service.GetArticleByID(id)
+
+	if article.AuthorId != userId && article.Visibility != 1 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "article not found",
+		})
+
+		return
+	}
+
 	user, _ := service.FindUserById(userId)
 
 	article.CanEdit = article.AuthorId == user.ID
@@ -41,7 +50,7 @@ func GetArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, article)
 }
 
-//GetArticles get articles
+// GetArticles get articles
 func GetArticles(c *gin.Context) {
 	userId := c.GetInt64("userId")
 
@@ -59,7 +68,7 @@ func GetArticles(c *gin.Context) {
 	return
 }
 
-//AddArticle add article
+// AddArticle add article
 func AddArticle(c *gin.Context) {
 	var article model.Article
 	authorId := c.GetInt64("userId")
@@ -83,7 +92,7 @@ func AddArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, savedArticle)
 }
 
-//UpdateArticle update article
+// UpdateArticle update article
 func UpdateArticle(c *gin.Context) {
 	var article model.Article
 
