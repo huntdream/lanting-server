@@ -10,7 +10,7 @@ import (
 	"github.com/huntdream/lanting-server/model"
 )
 
-//GetArticles get articles
+// GetArticles get articles
 func GetArticles(userId int64, size string, after string) (feed []model.Article, total int, count int) {
 	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where visibility=1 or author_id=? order by id desc", userId)
 
@@ -51,7 +51,7 @@ func GetArticles(userId int64, size string, after string) (feed []model.Article,
 	return feed, total, count
 }
 
-//GetArticleByID get article by id
+// GetArticleByID get article by id
 func GetArticleByID(id int64) (article model.Article, err error) {
 	row := app.DB.QueryRow("select id, title, author_id, excerpt, content, visibility, created_at, updated_at from articles where id = ?", id)
 
@@ -74,13 +74,13 @@ func GetArticleByID(id int64) (article model.Article, err error) {
 	return article, nil
 }
 
-//AddArticle add article
+// AddArticle add article
 func AddArticle(article model.Article) (value interface{}, err error) {
 	if article.Title == "" {
 		return nil, errors.New("title is required")
 	}
 
-	result, err := app.DB.Exec("insert into articles (title, content, author_id, excerpt, visibility) values (?,?,?,?,?)", article.Title, article.Content, article.AuthorId, article.Excerpt, article.Visibility)
+	result, err := app.DB.Exec("insert into articles (title, content, text, author_id, excerpt, visibility) values (?,?,?,?,?,?)", article.Title, article.Content, article.Text, article.AuthorId, article.Excerpt, article.Visibility)
 
 	if err != nil {
 		return 0, fmt.Errorf("addArticle: %v", err)
@@ -97,7 +97,7 @@ func AddArticle(article model.Article) (value interface{}, err error) {
 	return article, nil
 }
 
-//UpdateArticle update article
+// UpdateArticle update article
 func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{}, err error) {
 	useId := c.GetInt64("userId")
 
@@ -123,8 +123,9 @@ func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{},
 	article.Content = newArticle.Content
 	article.Excerpt = newArticle.Excerpt
 	article.Visibility = newArticle.Visibility
+	article.Text = newArticle.Text
 
-	_, err = app.DB.Exec("update articles set title = ?, content = ?, excerpt = ?, visibility = ? where id = ?", article.Title, article.Content, article.Excerpt, article.Visibility, article.ID)
+	_, err = app.DB.Exec("update articles set title = ?, content = ?,text = ?, excerpt = ?, visibility = ? where id = ?", article.Title, article.Content, article.Text, article.Excerpt, article.Visibility, article.ID)
 
 	if err != nil {
 		return 0, fmt.Errorf("updateArticle: %v", err)
