@@ -11,6 +11,7 @@ import (
 )
 
 func scanArticles(rows *sql.Rows) (articles []model.Article) {
+	articles = []model.Article{}
 
 	for rows.Next() {
 		var article model.Article
