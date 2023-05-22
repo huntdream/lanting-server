@@ -50,19 +50,43 @@ func GetArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, article)
 }
 
-// GetArticles get articles
-func GetArticles(c *gin.Context) {
+// GetArticlesByUserId get my articles
+func GetArticlesByUserId(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
 	userId := c.GetInt64("userId")
 
-	size := c.DefaultQuery("size", "10")
-	after := c.DefaultQuery("after", "0")
-
-	articles, total, count := service.GetArticles(userId, size, after)
+	articles, total := service.GetArticlesByUserID(id, userId)
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":  articles,
 		"total": total,
-		"count": count,
+	})
+
+	return
+}
+
+// GetArticles get articles
+func GetArticles(c *gin.Context) {
+	userId := c.GetInt64("userId")
+	isMe := c.Request.URL.Path
+
+	fmt.Println(isMe)
+
+	size := c.DefaultQuery("size", "10")
+	after := c.DefaultQuery("after", "0")
+
+	articles, total := service.GetArticles(userId, size, after)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":  articles,
+		"total": total,
 	})
 
 	return

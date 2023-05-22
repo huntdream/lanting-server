@@ -10,23 +10,15 @@ import (
 	"github.com/huntdream/lanting-server/model"
 )
 
-// GetArticles get articles
-func GetArticles(userId int64, size string, after string) (feed []model.Article, total int, count int) {
-	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where visibility=1 or author_id=? order by id desc", userId)
-
-	if err != nil {
-		return feed, 0, 0
-	}
-
-	defer rows.Close()
+func scanArticles(rows *sql.Rows) (articles []model.Article) {
 
 	for rows.Next() {
 		var article model.Article
 
-		if err = rows.Scan(&article.ID, &article.Title, &article.Excerpt, &article.Visibility, &article.AuthorId, &article.CreatedAt); err != nil {
+		if err := rows.Scan(&article.ID, &article.Title, &article.Excerpt, &article.Visibility, &article.AuthorId, &article.CreatedAt); err != nil {
 			fmt.Println(article.Title, err.Error())
 
-			return feed, 0, 0
+			return articles
 		}
 
 		author, err := FindUserById(article.AuthorId)
@@ -37,18 +29,61 @@ func GetArticles(userId int64, size string, after string) (feed []model.Article,
 
 		article.Author = author
 
-		feed = append(feed, article)
+		articles = append(articles, article)
 	}
+
+	return articles
+}
+
+// GetArticlesByUserID Get Articles By User ID
+func GetArticlesByUserID(id int64, userId int64) (feed []model.Article, total int) {
+	visibility := 0
+	if id == userId {
+		visibility = 1
+	}
+
+	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where visibility=? and author_id=? order by id desc", visibility, userId)
+
+	if err != nil {
+		return feed, 0
+	}
+
+	defer rows.Close()
+
+	feed = scanArticles(rows)
 
 	if err := rows.Err(); err != nil {
 		fmt.Println(err.Error())
 
-		return feed, 0, 0
+		return feed, 0
 	}
 
-	count = len(feed)
+	total = len(feed)
 
-	return feed, total, count
+	return feed, total
+}
+
+// GetArticles get articles
+func GetArticles(userId int64, size string, after string) (feed []model.Article, total int) {
+	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where visibility=1 or author_id=? order by id desc limit ?", userId, size)
+
+	if err != nil {
+		return feed, 0
+	}
+
+	defer rows.Close()
+
+	feed = scanArticles(rows)
+
+	if err := rows.Err(); err != nil {
+		fmt.Println(err.Error())
+
+		return feed, 0
+	}
+
+	total = len(feed)
+
+	return feed, total
 }
 
 // GetArticleByID get article by id
