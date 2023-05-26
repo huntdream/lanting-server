@@ -38,9 +38,9 @@ func scanArticles(rows *sql.Rows) (articles []model.Article) {
 
 // GetArticlesByUserID Get Articles By User ID
 func GetArticlesByUserID(id int64, userId int64) (feed []model.Article, total int) {
-	visibility := 0
+	visibility := 1
 	if id == userId {
-		visibility = 1
+		visibility = 2
 	}
 
 	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where (visibility <=? and author_id=?) and deleted is not true order by id desc", visibility, id)
