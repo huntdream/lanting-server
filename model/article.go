@@ -13,3 +13,18 @@ type Article struct {
 	Author     User   `json:"author" binding:"-"`
 	Base
 }
+
+type ArticleNode struct {
+	Type     string
+	Children []ArticleNode
+	Src      string
+}
+
+type ArticleContent struct {
+	Root ArticleNode
+}
+
+type ArticleMedia struct {
+	Src  string
+	Type string
+}

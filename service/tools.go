@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/huntdream/lanting-server/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,4 +28,22 @@ func GetUploadToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"token": upToken,
 	})
+}
+
+// GetMediaFromArticle get media
+func GetMediaFromArticle(nodes []model.ArticleNode, media []model.ArticleMedia) []model.ArticleMedia {
+	for _, child := range nodes {
+		if len(child.Children) != 0 {
+			media = GetMediaFromArticle(child.Children, media)
+		}
+
+		if child.Type == "audio" || child.Type == "video" || child.Type == "image" {
+			media = append(media, model.ArticleMedia{
+				Src:  child.Src,
+				Type: child.Type,
+			})
+		}
+	}
+
+	return media
 }

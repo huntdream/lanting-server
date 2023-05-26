@@ -142,3 +142,41 @@ func UpdateArticle(c *gin.Context) {
 
 	c.JSON(http.StatusOK, savedArticle)
 }
+
+func DeleteArticles(c *gin.Context) {
+	var ids model.Ids
+
+	if err := c.ShouldBind(&ids); err != nil {
+		log.Println(err)
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	if len(ids.Ids) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "ids is empty",
+		})
+
+		return
+	}
+
+	err := service.DeleteArticles(c, ids.Ids)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
+
+	return
+}

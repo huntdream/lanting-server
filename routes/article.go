@@ -19,5 +19,6 @@ func registerArticle(router *gin.RouterGroup) {
 	{
 		articles.GET("/", api.GetArticles)
 		articles.GET("/:id", api.GetArticlesByUserId)
+		articles.DELETE("", api.DeleteArticles)
 	}
 }

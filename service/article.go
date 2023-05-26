@@ -2,9 +2,9 @@ package service
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/huntdream/lanting-server/app"
 	"github.com/huntdream/lanting-server/model"
@@ -43,7 +43,7 @@ func GetArticlesByUserID(id int64, userId int64) (feed []model.Article, total in
 		visibility = 1
 	}
 
-	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where visibility=? and author_id=? order by id desc", visibility, userId)
+	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where (visibility=? and author_id=?) and deleted is not true order by id desc", visibility, userId)
 
 	if err != nil {
 		return feed, 0
@@ -66,7 +66,7 @@ func GetArticlesByUserID(id int64, userId int64) (feed []model.Article, total in
 
 // GetArticles get articles
 func GetArticles(userId int64, size string, after string) (feed []model.Article, total int) {
-	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where visibility=1 or author_id=? order by id desc limit ?", userId, size)
+	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where (visibility=1 or author_id=?) and deleted is not true order by id desc limit ?", userId, size)
 
 	if err != nil {
 		return feed, 0
@@ -89,7 +89,7 @@ func GetArticles(userId int64, size string, after string) (feed []model.Article,
 
 // GetArticleByID get article by id
 func GetArticleByID(id int64) (article model.Article, err error) {
-	row := app.DB.QueryRow("select id, title, author_id, excerpt, content, visibility, created_at, updated_at from articles where id = ?", id)
+	row := app.DB.QueryRow("select id, title, author_id, excerpt, content, visibility, created_at, updated_at from articles where id = ? and deleted is not true", id)
 
 	if err := row.Scan(&article.ID, &article.Title, &article.AuthorId, &article.Excerpt, &article.Content, &article.Visibility, &article.CreatedAt, &article.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
@@ -161,6 +161,19 @@ func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{},
 	article.Visibility = newArticle.Visibility
 	article.Text = newArticle.Text
 
+	var articleContent model.ArticleContent
+
+	err = json.Unmarshal([]byte(newArticle.Content), &articleContent)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var articleMedia []model.ArticleMedia
+	articleMedia = GetMediaFromArticle(articleContent.Root.Children, articleMedia)
+
+	fmt.Println(articleMedia)
+
 	_, err = app.DB.Exec("update articles set title = ?, content = ?,text = ?, excerpt = ?, visibility = ? where id = ?", article.Title, article.Content, article.Text, article.Excerpt, article.Visibility, article.ID)
 
 	if err != nil {
@@ -170,4 +183,53 @@ func UpdateArticle(c *gin.Context, newArticle model.Article) (value interface{},
 	article, err = GetArticleByID(article.ID)
 
 	return article, nil
+}
+
+// DeleteArticles delete articles by ids
+func DeleteArticles(c *gin.Context, ids []int64) (err error) {
+	userId := c.GetInt64("userId")
+	tx, err := app.DB.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	for _, id := range ids {
+		article, err := GetArticleByID(id)
+
+		if err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				return err
+			}
+		}
+
+		if article.AuthorId != userId {
+			err := tx.Rollback()
+
+			if err != nil {
+				return err
+			}
+
+			return errors.New("can not delete")
+		}
+
+		_, err = app.DB.Exec("update articles set deleted_at=now(), deleted=true where id=?", id)
+
+		if err != nil {
+			err := tx.Rollback()
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
