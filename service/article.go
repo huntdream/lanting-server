@@ -43,7 +43,7 @@ func GetArticlesByUserID(id int64, userId int64) (feed []model.Article, total in
 		visibility = 1
 	}
 
-	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where (visibility=? and author_id=?) and deleted is not true order by id desc", visibility, userId)
+	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where (visibility <=? and author_id=?) and deleted is not true order by id desc", visibility, userId)
 
 	if err != nil {
 		return feed, 0
