@@ -66,9 +66,10 @@ func GetArticlesByUserID(id int64, userId int64) (feed []model.Article, total in
 
 // GetArticles get articles
 func GetArticles(userId int64, size string, after string) (feed []model.Article, total int) {
-	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where (visibility=1 or author_id=?) and deleted is not true order by id desc limit ?", userId, size)
+	rows, err := app.DB.Query("select id, title, excerpt, visibility,author_id, created_at from articles where (visibility=1 or author_id=?) and deleted is not true order by id desc", userId)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		return feed, 0
 	}
 
