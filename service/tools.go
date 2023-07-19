@@ -12,6 +12,14 @@ import (
 
 // GetUploadToken Get qiniu upload token
 func GetUploadToken(c *gin.Context) {
+	if c.GetInt64("userId") == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+
+		return
+	}
+
 	bucket := app.Config.Storage.Bucket
 
 	secretKey := app.Config.Storage.SecretKey
