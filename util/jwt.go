@@ -9,14 +9,14 @@ import (
 
 var jwtKey = []byte("my_secret_key")
 
-//Claims JWT claims
+// Claims JWT claims
 type Claims struct {
 	Username string `json:"username"`
 	ID       int64  `json:"id"`
 	jwt.RegisteredClaims
 }
 
-//GenerateToken generate jwt token
+// GenerateToken generate jwt token
 func GenerateToken(user model.User) (tokenString string, err error) {
 	//the token expiration time
 	expirationTime := time.Now().Add(500 * time.Hour)
@@ -40,11 +40,15 @@ func GenerateToken(user model.User) (tokenString string, err error) {
 	return tokenString, nil
 }
 
-//ParseToken parse jwt token
+// ParseToken parse jwt token
 func ParseToken(tokenString string) (userId int64, username string, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
+
+	if err != nil {
+		return 0, "", err
+	}
 
 	claims := token.Claims.(*Claims)
 

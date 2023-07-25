@@ -14,7 +14,12 @@ func User() gin.HandlerFunc {
 		if authorization != "" {
 			token := strings.TrimPrefix(authorization, "Bearer ")
 
-			userId, _, _ := util.ParseToken(token)
+			userId, _, err := util.ParseToken(token)
+
+			if err != nil {
+				c.Next()
+			}
+
 			fmt.Println("userId", userId)
 			c.Set("userId", userId)
 
