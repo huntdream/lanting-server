@@ -56,9 +56,9 @@ func FindUserByUsername(username string) (user model.User, err error) {
 
 // FindUserById find user by id
 func FindUserById(id int64) (user model.User, err error) {
-	row := app.DB.QueryRow("select id, username, avatar, name from users where id = ?", id)
+	row := app.DB.QueryRow("select id, username, avatar, name, bio, email from users where id = ?", id)
 
-	if err := row.Scan(&user.ID, &user.Username, &user.Avatar, &user.Name); err != nil {
+	if err := row.Scan(&user.ID, &user.Username, &user.Avatar, &user.Name, &user.Bio, &user.Email); err != nil {
 		if err == sql.ErrNoRows {
 			return user, fmt.Errorf("user not found")
 		}
@@ -116,5 +116,51 @@ func GetUserById(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+	return
+}
+
+// UpdateUser Update user info
+func UpdateUser(c *gin.Context) {
+	var user model.UserInfo
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+	userId := c.GetInt64("userId")
+
+	if userId != user.ID {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Are you trying to update other user's profile ?",
+		})
+
+		return
+	}
+
+	_, err := app.DB.Exec("update users set avatar=?, name=? where id=?", user.Avatar, user.Name, user.ID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	updatedUser, err := FindUserById(user.ID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedUser)
+
 	return
 }

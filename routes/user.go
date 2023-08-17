@@ -12,5 +12,6 @@ func registerUser(router *gin.RouterGroup) {
 		user.POST("", service.CreateUser)
 		user.GET("/me", service.GetCurrentUser)
 		user.GET("/:id", service.GetUserById)
+		user.POST("/update", service.UpdateUser)
 	}
 }
