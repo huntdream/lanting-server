@@ -9,7 +9,6 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.22
 	github.com/qiniu/go-sdk/v7 v7.14.0
 	github.com/spf13/viper v1.15.0
-	github.com/ugorji/go v1.2.7 // indirect
 	golang.org/x/crypto v0.9.0
 	golang.org/x/net v0.10.0
 )
